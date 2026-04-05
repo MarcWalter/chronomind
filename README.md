@@ -1,86 +1,109 @@
-<a href="https://chat.vercel.ai/">
-  <img alt="Next.js 13 and app template Router-ready AI chatbot." src="https://chat.vercel.ai/opengraph-image.png" />
-  <h1 align="center">Next.js AI Chatbot</h1>
-</a>
+# ChronoMind
 
-<p align="center">
-  An open-source AI chatbot app template built with Next.js, the Vercel AI SDK, OpenAI, and Supabase Auth and Postgres DB.
-</p>
+> KI-gestützte Zeiterfassungs-App mit natürlichsprachiger Eingabe per Text und Sprache, WebCal-Integration, Auswertung und flexiblen Exportformaten.
 
 <p align="center">
   <a href="#features"><strong>Features</strong></a> ·
-  <a href="#model-providers"><strong>Model Providers</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
-  <a href="#running-locally"><strong>Running locally</strong></a> ·
-  <a href="#authors"><strong>Authors</strong></a>
+  <a href="#setup"><strong>Setup</strong></a> ·
+  <a href="#entwicklung"><strong>Entwicklung</strong></a> ·
+  <a href="#deploy"><strong>Deploy</strong></a>
 </p>
 <br/>
 
 ## Features
 
-- [Next.js](https://nextjs.org) App Router
-- React Server Components (RSCs), Suspense, and Server Actions
-- [Vercel AI SDK](https://sdk.vercel.ai/docs) for streaming chat UI
-- Support for OpenAI (default), Anthropic, Hugging Face, or custom AI chat models and/or LangChain
-- Edge runtime-ready
-- [shadcn/ui](https://ui.shadcn.com)
-  - Styling with [Tailwind CSS](https://tailwindcss.com)
-  - [Radix UI](https://radix-ui.com) for headless component primitives
-  - Icons from [Phosphor Icons](https://phosphoricons.com)
-- Chat History with [Supabase Postgres DB](https://supabase.com)
-- [Supabase Auth](https://supabase.com/auth) for authentication
+- Natürlichsprachige Zeiterfassung per Chat (KI-gestützt)
+- Sprachinput per Web Speech API
+- WebCal-Kalender-Import
+- Auswertung mit Charts
+- Export: iCal, CSV, JSON
+- Multi-Provider-KI (Mistral, routerlab.ch)
 
-## Model Providers
+## Setup
 
-This template ships with OpenAI `gpt-3.5-turbo` as the default. However, thanks to the [Vercel AI SDK](https://sdk.vercel.ai/docs), you can switch LLM providers to [Anthropic](https://anthropic.com), [Hugging Face](https://huggingface.co), or using [LangChain](https://js.langchain.com) with just a few lines of code.
+### 1. Umgebungsvariablen
 
-## Deploy Your Own
-
-You can deploy your own version of the Next.js AI Chatbot to Vercel with one click:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fsupabase-community%2Fvercel-ai-chatbot&env=OPENAI_API_KEY&envDescription=You%20must%20first%20activate%20a%20Billing%20Account%20here%3A%20https%3A%2F%2Fplatform.openai.com%2Faccount%2Fbilling%2Foverview&envLink=https%3A%2F%2Fplatform.openai.com%2Faccount%2Fapi-keys&project-name=vercel-ai-chatbot-with-supabase&repository-name=vercel-ai-chatbot-with-supabase&integration-ids=oac_VqOgBHqhEoFTPzGkPd7L0iH6&external-id=https%3A%2F%2Fgithub.com%2Fsupabase-community%2Fvercel-ai-chatbot%2Ftree%2Fmain)
-
-### Set up GitHub OAuth
-
-This demo uses GitHub Oauth. Follow the [GitHub OAuth setup steps](https://supabase.com/docs/guides/auth/social-login/auth-github) on your Supabase project.
-
-### Configure your site url
-
-In the Supabase Dashboard, navigate to [Auth > URL configuration](https://app.supabase.com/project/_/auth/url-configuration) and set your Vercel URL as the site URL.
-
-## Running locally
-
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables) for this, but a `.env` file is all that is necessary.
-
-> Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various OpenAI and authentication provider accounts.
-
-Copy the `.env.example` file and populate the required env vars:
+Kopiere `.env.example` nach `.env.local` und fülle die Werte aus:
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-[Install the Supabase CLI](https://supabase.com/docs/guides/cli) and start the local Supabase stack:
+Benötigte Variablen:
+- `NEXT_PUBLIC_SUPABASE_URL` – aus Supabase Dashboard
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` – aus Supabase Dashboard
+- `MISTRAL_API_KEY` – von [console.mistral.ai](https://console.mistral.ai)
+- `ROUTERLAB_API_KEY` – von routerlab.ch (optional)
 
-```bash
-npm install supabase --save-dev
-npx supabase start
-```
+### 2. Supabase einrichten
 
-Install the local dependencies and start dev mode:
+1. Neues Supabase-Projekt erstellen
+2. Migration ausführen:
+   ```bash
+   npx supabase db push
+   ```
+   Oder die SQL-Datei manuell im Supabase SQL Editor ausführen:
+   - `supabase/migrations/002_time_tracking.sql`
+
+### 3. Auth konfigurieren
+
+Im Supabase Dashboard unter **Auth > URL configuration**:
+- Site URL setzen (z.B. `http://localhost:3000`)
+
+Optional: GitHub OAuth aktivieren unter **Auth > Providers > GitHub**
+
+### 4. Dependencies installieren
 
 ```bash
 pnpm install
+```
+
+### 5. Entwicklung starten
+
+```bash
 pnpm dev
 ```
 
-Your app template should now be running on [localhost:3000](http://localhost:3000/).
+App läuft auf [http://localhost:3000](http://localhost:3000)
 
-## Authors
+## Entwicklung
 
-This library is created by [Vercel](https://vercel.com) and [Next.js](https://nextjs.org) team members, with contributions from:
+### Datenbank-Migrationen
 
-- Jared Palmer ([@jaredpalmer](https://twitter.com/jaredpalmer)) - [Vercel](https://vercel.com)
-- Shu Ding ([@shuding\_](https://twitter.com/shuding_)) - [Vercel](https://vercel.com)
-- shadcn ([@shadcn](https://twitter.com/shadcn)) - [Contractor](https://shadcn.com)
-- Thor Schaeff ([@thorwebdev](https://twitter.com/thorwebdev)) - [Supabaseifier](https://thor.bio)
+Neue Tabellen/Spalten immer als neue Migration hinzufügen:
+
+```bash
+npx supabase migration new <name>
+```
+
+### Branch-Strategie
+
+```
+main          → stabil, production-ready
+develop       → Integrations-Branch
+feature/<name> → ein Branch pro Feature
+```
+
+### Conventional Commits
+
+```bash
+git commit -m "feat: neue Funktion"
+git commit -m "fix: bug behoben"
+git commit -m "docs: dokumentation aktualisiert"
+```
+
+## Tech Stack
+
+| Bereich | Technologie |
+|---------|-------------|
+| Framework | Next.js 14 (App Router) |
+| Sprache | TypeScript |
+| UI | shadcn/ui + Tailwind CSS |
+| DB | Supabase (PostgreSQL) |
+| Auth | Supabase Auth |
+| KI | Vercel AI SDK + Mistral |
+| Charts | recharts |
+
+## Lizenz
+
+MIT
