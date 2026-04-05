@@ -503,12 +503,11 @@ Das Projekt ist bewusst so gebaut, dass es erweiterbar bleibt:
 
 ## Aktueller Status
 
-**Aktuelle Phase**: Phase 1 – noch nicht gestartet  
-**Letzter Commit**: –  
-**Offene Blocker**: 
-- [ ] Supabase-Projekt anlegen und URL/Keys in `.env.local` eintragen
-- [ ] routerlab.ch API-Kompatibilität prüfen (OpenAI-kompatibel?)
-- [ ] GitHub-Repo anlegen
+**Aktuelle Phase**: Phase 2 – abgeschlossen
+**Letzter Commit**: 4b29e28 feat: Phase 1 - Auth, Manual Entry, Dashboard
+**Phase 2 abgeschlossen**: System-Prompt Builder, create/update/list_time_entries Tools, Chat API mit Mistral/routerlab, VoiceInputButton
+
+**Offene Blocker**: keine
 
 ---
 
