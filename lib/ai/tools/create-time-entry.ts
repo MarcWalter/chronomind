@@ -1,11 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
-import { type Database } from '@/lib/db_types'
+import { zodSchema } from 'ai'
 import { z } from 'zod'
-import { cookies } from 'next/headers'
-import { auth } from '@/auth'
+import { getSession } from '@/lib/auth/session'
+import { localDb } from '@/lib/db/local'
 
-// Schema für Tool-Parameter
-export const createTimeEntryParams = z.object({
+const createTimeEntryParamsSchema = z.object({
   title: z.string().describe('Bezeichnung der Tätigkeit'),
   category: z.string().optional().describe('Kategorie z.B. Arbeit, Meeting, Pause, Privat'),
   description: z.string().optional().describe('Optionale Beschreibung'),
@@ -13,13 +11,12 @@ export const createTimeEntryParams = z.object({
   ended_at: z.string().optional().describe('Endzeit als ISO 8601 String, optional wenn noch aktiv')
 })
 
-export type CreateTimeEntryParams = z.infer<typeof createTimeEntryParams>
+export type CreateTimeEntryParams = z.infer<typeof createTimeEntryParamsSchema>
 
-// Tool Definition für Vercel AI SDK
 export const createTimeEntryTool = {
   name: 'create_time_entry',
   description: 'Erstellt einen neuen Zeiteintrag in der Datenbank. Nutze dieses Tool wenn der Benutzer einen neuen Zeiteintrag erstellen möchte.',
-  parameters: createTimeEntryParams,
+  inputSchema: zodSchema(createTimeEntryParamsSchema),
   execute: async (params: CreateTimeEntryParams) => {
     return await createTimeEntry(params)
   }
@@ -27,40 +24,30 @@ export const createTimeEntryTool = {
 
 export async function createTimeEntry(params: CreateTimeEntryParams): Promise<{ success: boolean; entry?: any; error?: string }> {
   try {
-    const cookieStore = cookies()
-    const session = await auth({ cookieStore })
+    const session = await getSession()
 
-    if (!session?.user) {
+    if (!session?.id) {
       return { success: false, error: 'Nicht authentifiziert' }
     }
 
-    const supabase = createClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
+    const id = crypto.randomUUID()
     const entryData = {
-      user_id: session.user.id,
+      id,
+      userId: session.id,
       title: params.title,
       category: params.category || null,
       description: params.description || null,
-      started_at: params.started_at,
-      ended_at: params.ended_at || null,
-      source: 'ai_chat'
+      startedAt: params.started_at,
+      endedAt: params.ended_at || null,
+      source: 'ai_chat',
+      createdAt: new Date()
     }
 
-    const { data, error } = await supabase
-      .from('time_entries')
-      .insert(entryData)
-      .select()
-      .single()
+    await localDb.timeEntries.create(entryData)
 
-    if (error) {
-      console.error('Database error:', error)
-      return { success: false, error: error.message }
-    }
+    const [entry] = await localDb.timeEntries.findById(id)
 
-    return { success: true, entry: data }
+    return { success: true, entry }
   } catch (err) {
     console.error('Create time entry error:', err)
     return { success: false, error: 'Fehler beim Erstellen des Eintrags' }
